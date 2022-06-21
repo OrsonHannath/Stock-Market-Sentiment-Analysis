@@ -8,7 +8,7 @@ import stockanalysis as sa
 def analyse_ticker_input():
     if anlyTickerInput.get() != "" and anlyTickerInput.get() != "Ticker or Tickers (ticker1, ticker2)":
         print("Analysing Input Ticker(s)")
-        sa.analyse_ticker_input(canvas, anlyTickerInput.get())
+        sa.analyse_ticker_input(frame, anlyTickerInput.get(), canvas, root)
     else:
         print("Invalid Input Ticker(s)")
 
@@ -16,12 +16,13 @@ def analyse_ticker_input():
 def analyse_ticker_file():
     if fileLocation != "":
         print("Analysing Input Ticker(s) From File")
-        sa.analyse_ticker_file(canvas, fileLocation)
+        sa.analyse_ticker_file(frame, fileLocation, canvas, root)
     else:
         print("Invalid File Path")
 
 # --- Tkinter Canvas Setup ---
 root = tk.Tk()
+root.resizable(0, 0)
 canvas = tk.Canvas(root, height=300, width=700, bg="#121212")
 canvas.pack()
 
