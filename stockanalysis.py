@@ -327,51 +327,37 @@ def stockanalysis_sentiment(ticker, client):
     articles_df = pd.DataFrame(data=articles_d)
     print(articles_df)
 
-
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
-    # --- OBTAIN LATEST ARTICLES ---
-    # Get Stock News if It Exists
-    resp = client.get('news', symbol=ticker)
-    resp.wait()
-
     # Check if the result was an error or not
-    if not resp.error:
-
-        # Go over all available articles
-        num_of_articles = len(resp.data.get('list'))
-        articles_list = resp.data.get('list')
+    if not articles_df.empty:
 
         # Get Historical Price Data
         hist_price_data = yf.Ticker(ticker).history(period="3mo")
         hist = pd.DataFrame(hist_price_data)
         hist = hist.filter(['Open', 'Close'])
 
-        for article in articles_list:
+        for index, row in articles_df.iterrows():
 
             # --- Obtain Main Text of Article ---
-            url = article['link']
+            url = row['url']
 
             # Try to open the url
             response = requests.get(url)
             if not response.ok:
                 print("Failed to load page {}".format(url))
             else:
-                # Log the publishing datetime
-                publish_time = int(article['providerPublishTime'])
 
                 # Date String in Format YYYY-MM-DD
-                publish_date = datetime.datetime.fromtimestamp(publish_time)  # .strftime("%Y-%m-%d")
-                most_current_date = hist.iloc[-1].name  # .strftime("%Y-%m-%d")
+                publish_date = datetime.strptime(row['publish_date'], "%Y-%m-%d")
+                most_current_date = hist.iloc[-1].name
                 date_delta = most_current_date - publish_date
 
-                print(publish_date)
-                print(most_current_date)
-                print(date_delta)
+                # print(publish_date)
+                # print(most_current_date)
+                # print(date_delta)
 
                 if date_delta.days >= 7:
 
-                    # Failed on AVGO # Convert webpage to a BeautifulSoup Object
+                    # Convert webpage to a BeautifulSoup Object
                     page_content = response.text
                     doc = BeautifulSoup(page_content, "html.parser")
 
@@ -389,7 +375,7 @@ def stockanalysis_sentiment(ticker, client):
                     count = 0
                     for i in range(7):
 
-                        date = publish_date + datetime.timedelta(days=i)
+                        date = publish_date + timedelta(days=i)
 
                         if date.strftime("%Y-%m-%d") in hist.index:
                             open = hist.loc[date.strftime("%Y-%m-%d")]['Open']
@@ -414,5 +400,8 @@ def stockanalysis_sentiment(ticker, client):
                         neutral_sentiment.append(news_content_string)
                 else:
                     print("Article Not Old Enough")
+
+    else:
+        print("No News Articles Found For: " + ticker)
 
     return positive_sentiment, negative_sentiment, neutral_sentiment
