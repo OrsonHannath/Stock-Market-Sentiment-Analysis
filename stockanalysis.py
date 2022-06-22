@@ -14,6 +14,7 @@ import nltk
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -294,9 +295,12 @@ def stockanalysis_sentiment(ticker, client):
     # Let the user know analysis has begun
     print("Analysing, " + ticker)
 
+    # Setup CHROME OPTIONS so that the Chrome browser is hidden
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+
     # Obtain News Articles For the Stock
-    service = Service(executable_path=ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), chrome_options=chrome_options)
 
     # Create the url link for the stock then open it on the browser
     stock_yahoo_url = "https://au.finance.yahoo.com/quotes/" + str(ticker)
@@ -318,17 +322,20 @@ def stockanalysis_sentiment(ticker, client):
                 page_urls.append(link.get("href"))
 
             # Check if the articles are x amount of days old and make sure it is a yahoo finance article
-            for i in range(14):
-                if title_date == str(" " + str(7 + i) + " days ago") and page_urls[1][0:33] == "https://au.finance.yahoo.com/news":
-                    urls.append(page_urls[1])
-                    publish_dates.append((datetime.today() - timedelta(days=7+i)).strftime("%Y-%m-%d"))
+            if len(page_urls) > 1:
+                for i in range(14):
+                    if title_date == str(" " + str(7 + i) + " days ago") and page_urls[1][0:33] == "https://au.finance.yahoo.com/news":
+                        urls.append(page_urls[1])
+                        publish_dates.append((datetime.today() - timedelta(days=7+i)).strftime("%Y-%m-%d"))
+                        break
 
     articles_d = {'url': urls, 'publish_date': publish_dates}
     articles_df = pd.DataFrame(data=articles_d)
-    print(articles_df)
 
     # Check if the result was an error or not
     if not articles_df.empty:
+
+        print(articles_df)
 
         # Get Historical Price Data
         hist_price_data = yf.Ticker(ticker).history(period="3mo")
@@ -381,7 +388,7 @@ def stockanalysis_sentiment(ticker, client):
                             open = hist.loc[date.strftime("%Y-%m-%d")]['Open']
                             close = hist.loc[date.strftime("%Y-%m-%d")]['Close']
 
-                            avg_movement += (abs(open-close)/open)
+                            avg_movement += -((open-close)/open)
                             count += 1
                             print(avg_movement)
 
