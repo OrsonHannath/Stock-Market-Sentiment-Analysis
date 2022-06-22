@@ -3,22 +3,39 @@ import tkinter as tk
 from tkinter import filedialog
 import stockanalysis as sa
 
+training = True
 
-# Analyse
+
 def analyse_ticker_input():
-    if anlyTickerInput.get() != "" and anlyTickerInput.get() != "Ticker or Tickers (ticker1, ticker2)":
-        print("Analysing Input Ticker(s)")
-        sa.analyse_ticker_input(frame, anlyTickerInput.get(), canvas, root)
+    # Check if trying to train data set or trying to get Evaluation
+    if not training:
+        if anlyTickerInput.get() != "" and anlyTickerInput.get() != "Ticker or Tickers (ticker1, ticker2)":
+            print("Analysing Input Ticker(s)")
+            sa.analyse_ticker_input(frame, anlyTickerInput.get(), canvas, root)
+        else:
+            print("Invalid Input Ticker(s)")
     else:
-        print("Invalid Input Ticker(s)")
+        if anlyTickerInput.get() != "" and anlyTickerInput.get() != "Ticker or Tickers (ticker1, ticker2)":
+            print("Analysing Input Ticker(s)")
+            sa.analyse_sentiment_ticker_input(anlyTickerInput.get())
+        else:
+            print("Invalid Input Ticker(s)")
 
 
 def analyse_ticker_file():
-    if fileLocation != "":
-        print("Analysing Input Ticker(s) From File")
-        sa.analyse_ticker_file(frame, fileLocation, canvas, root)
+    # Check if trying to train data set or trying to get Evaluation
+    if not training:
+        if fileLocation != "":
+            print("Analysing Input Ticker(s) From File")
+            sa.analyse_ticker_file(frame, fileLocation, canvas, root)
+        else:
+            print("Invalid File Path")
     else:
-        print("Invalid File Path")
+        if fileLocation != "":
+            print("Analysing Input Ticker(s) From File")
+            sa.analyse_sentiment_ticker_file(fileLocation)
+        else:
+            print("Invalid File Path")
 
 # --- Tkinter Canvas Setup ---
 root = tk.Tk()
