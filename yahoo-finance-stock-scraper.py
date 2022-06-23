@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
+from os.path import exists
 
 stocks = ""
 
@@ -58,6 +59,6 @@ for i in range(number_of_pages_to_check):
     for index, row in df.iterrows():
         stocks += str(row['Symbol']) + ","
 
-    # Save the stock list to a csv
-    with open('yahoo_finance_symbols/main_crypto_listx.csv', 'w') as f:
-        f.write(stocks)
+    # Save the stock list to a csv (Commented so that accidental saving doesnt happen (CHANGE FILE PATH))
+    # with open('yahoo_finance_symbols/main_crypto_listxxx.csv', 'w') as f:
+        # f.write(stocks)

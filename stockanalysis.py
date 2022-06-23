@@ -1,7 +1,6 @@
 # Import main packages
 from yfrake import client
 import yfinance as yf
-import numpy as np
 import tkinter as tk
 from tkinter import ttk
 import pandas as pd
@@ -14,9 +13,9 @@ import nltk
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+from os.path import exists
 
 
 @client.session
@@ -225,12 +224,29 @@ def analyse_sentiment_tickers(tickers):
             print("Ticker \"" + tick + "\" Not Found")
             continue
 
+    # Obtain News Articles For the Stock
+    service = Service(executable_path=ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
+
     # Loop through all the true tickers and analyse them
     for ticker in true_tickers:
-        sentiments = stockanalysis_sentiment(ticker, client)
+        sentiments = stockanalysis_sentiment(ticker, client, driver)
         positive_sent_final.append(sentiments[0])
         negative_sent_final.append(sentiments[1])
         neutral_sent_final.append(sentiments[2])
+
+    # Create Backup of Current CSV Files if they exist
+    if exists("training_data/positive_sentiment.csv"):
+        csv = pd.read_csv("training_data/positive_sentiment.csv")
+        csv.to_csv("training_data/backups/positive_sentiment_backup.csv")
+
+    if exists("training_data/negative_sentiment.csv"):
+        csv = pd.read_csv("training_data/negative_sentiment.csv")
+        csv.to_csv("training_data/backups/negative_sentiment_backup.csv")
+
+    if exists("training_data/neutral_sentiment.csv"):
+        csv = pd.read_csv("training_data/neutral_sentiment.csv")
+        csv.to_csv("training_data/backups/neutral_sentiment_backup.csv")
 
     # Save the analysis to file
     pos_sent_df = pd.DataFrame(positive_sent_final)
@@ -282,7 +298,7 @@ def analyse_sentiment_ticker_input(user_input):
 
 
 # This function analyses a stock given its ticker
-def stockanalysis_sentiment(ticker, client):
+def stockanalysis_sentiment(ticker, client, driver):
 
     # URL dataframe
     urls = []
@@ -297,9 +313,7 @@ def stockanalysis_sentiment(ticker, client):
 
     # Make it so that the browser is always open so that a new one doesnt need to be opened each time (just open the new url)
 
-    # Obtain News Articles For the Stock
-    service = Service(executable_path=ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
+
 
     # Create the url link for the stock then open it on the browser
     stock_yahoo_url = "https://au.finance.yahoo.com/quotes/" + str(ticker)

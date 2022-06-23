@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import filedialog
 import stockanalysis as sa
 
-training = False
+training = True
 training_btn_txt_file = "Find Data"
 training_btn_txt_input = "Find Data"
 
