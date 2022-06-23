@@ -295,12 +295,11 @@ def stockanalysis_sentiment(ticker, client):
     # Let the user know analysis has begun
     print("Analysing, " + ticker)
 
-    # Setup CHROME OPTIONS so that the Chrome browser is hidden
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # Make it so that the browser is always open so that a new one doesnt need to be opened each time (just open the new url)
 
     # Obtain News Articles For the Stock
-    driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), chrome_options=chrome_options)
+    service = Service(executable_path=ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
 
     # Create the url link for the stock then open it on the browser
     stock_yahoo_url = "https://au.finance.yahoo.com/quotes/" + str(ticker)
@@ -399,9 +398,9 @@ def stockanalysis_sentiment(ticker, client):
                         avg_movement = 0
 
                     # Rank the news article based on its average movement
-                    if avg_movement >= 0.025:
+                    if avg_movement >= 0.01:
                         positive_sentiment.append(news_content_string)
-                    elif avg_movement <= -0.025:
+                    elif avg_movement <= -0.01:
                         negative_sentiment.append(news_content_string)
                     else:
                         neutral_sentiment.append(news_content_string)
