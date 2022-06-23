@@ -224,13 +224,9 @@ def analyse_sentiment_tickers(tickers):
             print("Ticker \"" + tick + "\" Not Found")
             continue
 
-    # Obtain News Articles For the Stock
-    service = Service(executable_path=ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service)
-
     # Loop through all the true tickers and analyse them
     for ticker in true_tickers:
-        sentiments = stockanalysis_sentiment(ticker, client, driver)
+        sentiments = stockanalysis_sentiment(ticker, client)
         positive_sent_final.append(sentiments[0])
         negative_sent_final.append(sentiments[1])
         neutral_sent_final.append(sentiments[2])
@@ -298,7 +294,7 @@ def analyse_sentiment_ticker_input(user_input):
 
 
 # This function analyses a stock given its ticker
-def stockanalysis_sentiment(ticker, client, driver):
+def stockanalysis_sentiment(ticker, client):
 
     # URL dataframe
     urls = []
@@ -311,9 +307,9 @@ def stockanalysis_sentiment(ticker, client, driver):
     # Let the user know analysis has begun
     print("Analysing, " + ticker)
 
-    # Make it so that the browser is always open so that a new one doesnt need to be opened each time (just open the new url)
-
-
+    # Obtain News Articles For the Stock
+    service = Service(executable_path=ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service)
 
     # Create the url link for the stock then open it on the browser
     stock_yahoo_url = "https://au.finance.yahoo.com/quotes/" + str(ticker)
